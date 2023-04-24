@@ -44,6 +44,9 @@ def bubble_sort(array):
 
 def bogo_sort(array):
 
+    MAX_ITERATIONS = 1000
+    iterations = 0
+
     sorted = True
 
     for index in range(len(array)-1):
@@ -54,6 +57,12 @@ def bogo_sort(array):
             break
 
     while not sorted:
+
+        iterations += 1
+
+        if iterations > MAX_ITERATIONS:
+
+            return "Exceeded limit on iterations"
 
         shuffle(array)
 
@@ -149,11 +158,12 @@ def heap_sort(array):
         tail_index -= 1
 
         heap[1] = heap[tail_index]
+        heap[tail_index] = inf
 
         problem_index = 1
 
-        while problem_index < tail_index//2 and heap[problem_index] > \
-            min(heap[problem_index*2], heap[problem_index*2+1]):
+        while problem_index*2+1 < len(heap) and heap[problem_index] > \
+                min(heap[problem_index*2], heap[problem_index*2+1]):
 
             if heap[problem_index*2] <= heap[problem_index*2+1]:
 
@@ -247,7 +257,7 @@ def quick_sort(array):
 
                 pivot = low
 
-            if low == pivot:
+            elif low == pivot:
 
                 pivot = high
             
@@ -270,7 +280,7 @@ if __name__ == "__main__":
         
         print(f"\nTESTING {sort[0]} Sort\n")
 
-        with open("unit_tests.txt", "r") as tests:
+        with open("sorting_unit_tests.txt", "r") as tests:
 
             for index, test in enumerate(\
                 [[eval(y) for y in x.strip().split(" ")] for x in tests]):
@@ -286,7 +296,7 @@ if __name__ == "__main__":
                 else:
 
                     print(f"FAILED, expected {test[1]}, got {result}")
-                    
+                        
                     exit(1)
 
     exit(0)
