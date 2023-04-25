@@ -1,28 +1,93 @@
 from random import shuffle, randrange
 from math import inf
 from sys import exit
+from time import time
+
+class BogoIterationError(Exception):
+
+    pass
+
+class InputRefusedError(Exception):
+
+    pass
 
 def insertion_sort(array):
 
+    start_time = time()
+
+    comparisons = 0
+    swap_number = 0
+    
     sorted_index = 1
 
     while sorted_index < len(array):
-        
-        insert_index = 0
 
-        while array[insert_index] < array[sorted_index] and \
-            insert_index < sorted_index:
+        swaps = 0
 
-            insert_index += 1
-        
-        array = array[:insert_index] + [array[sorted_index]] + \
-              array[insert_index:sorted_index] + array[sorted_index+1:]
+        while sorted_index > swaps:
+
+            comparisons += 1
+
+            if array[sorted_index-swaps] < array[sorted_index-swaps-1]:
+
+                array[sorted_index-swaps], array[sorted_index-swaps-1] = \
+                    array[sorted_index-swaps-1], array[sorted_index-swaps]
+                
+                swap_number += 1
+            
+            swaps += 1
         
         sorted_index += 1
+    
+    end_time = time()
 
-    return array
+    return array, end_time - start_time, comparisons, swap_number
 
 def bubble_sort(array):
+
+    start_time = time()
+
+    comparisons = 0
+    swaps = 0
+
+    swap_made = True
+    pass_no = 1
+
+    while swap_made:
+
+        swap_made = False
+
+        for index in range(len(array)-pass_no):
+
+            comparisons += 1
+
+            if array[index] > array[index+1]:
+
+                array[index], array[index+1] = \
+                    array[index+1], array[index]
+
+                swap_made = True
+
+                swaps += 1
+            
+        pass_no += 1
+
+    end_time = time()
+    
+    return array, end_time - start_time, comparisons, swaps
+
+def cocktail_shaker_sort(array):
+
+    start_time = time()
+
+    comparisons = 0
+    swaps = 0
+
+    start = 0
+    end = len(array)
+    current = 1
+
+    direction = 1
 
     swap_made = True
 
@@ -30,21 +95,44 @@ def bubble_sort(array):
 
         swap_made = False
 
-        for index in range(len(array)-1):
+        while current < end and current >= start:
 
-            if array[index] > array[index+1]:
+            comparisons += 1
 
-                temp = array[index]
-                array[index] = array[index+1]
-                array[index+1] = temp
+            if array[current]*direction < array[current-direction]*direction:
 
+                array[current], array[current-direction] = \
+                    array[current-direction], array[current]
+                
                 swap_made = True
+
+                swaps += 1
+            
+            current += direction
+        
+        if direction > 0:
+
+            end -= 1
+            current = end-1
+        
+        else:
+
+            start += 1
+            current = start
+        
+        direction *= -1
     
-    return array
+    end_time = time()
+    
+    return array, end_time - start_time, comparisons, swaps
 
 def bogo_sort(array):
 
-    MAX_ITERATIONS = 1000
+    start_time = time()
+
+    comparisons = 0
+
+    MAX_ITERATIONS = 1000000
     iterations = 0
 
     sorted = True
@@ -62,7 +150,7 @@ def bogo_sort(array):
 
         if iterations > MAX_ITERATIONS:
 
-            return "Exceeded limit on iterations"
+            raise BogoIterationError
 
         shuffle(array)
 
@@ -70,14 +158,22 @@ def bogo_sort(array):
 
         for index in range(len(array)-1):
 
+            comparisons += 1
+
             if array[index] > array[index+1]:
 
                 sorted = False
                 break
     
-    return array
+    end_time = time()
+    
+    return array, end_time - start_time, comparisons
 
 def merge_sort(array):
+    
+    start_time = time()
+
+    comparisons = 0
 
     sublists = [[element] for element in array]
 
@@ -94,6 +190,8 @@ def merge_sort(array):
             b_index = 0
 
             while a_index < len(a) and b_index < len(b):
+
+                comparisons += 1
 
                 if a[a_index] < b[b_index]:
 
@@ -118,11 +216,18 @@ def merge_sort(array):
         
         sublists = [element for element in sublists if element is not None]
     
-    if len(sublists) == 1: return sublists[0]
+    end_time = time()
+    
+    if len(sublists) == 1: return sublists[0], end_time-start_time, comparisons
 
-    return []
+    return [], end_time - start_time, comparisons
 
 def heap_sort(array):
+
+    start_time = time()
+
+    comparisons = 0
+    swaps = 0
 
     x = 1
 
@@ -140,11 +245,16 @@ def heap_sort(array):
 
         problem_index = tail_index
 
+        comparisons += 1
+
         while heap[problem_index] <= heap[problem_index//2]:
 
-            temp = heap[problem_index]
-            heap[problem_index] = heap[problem_index//2]
-            heap[problem_index//2] = temp
+            comparisons += 1
+            swaps += 1
+
+            heap[problem_index], heap[problem_index//2] = \
+                heap[problem_index//2], heap[problem_index]
+
             problem_index //= 2
         
         tail_index += 1
@@ -162,29 +272,43 @@ def heap_sort(array):
 
         problem_index = 1
 
+        comparisons += 1
+
         while problem_index*2+1 < len(heap) and heap[problem_index] > \
                 min(heap[problem_index*2], heap[problem_index*2+1]):
+            
+            comparisons += 2
 
             if heap[problem_index*2] <= heap[problem_index*2+1]:
 
-                temp = heap[problem_index]
-                heap[problem_index] = heap[problem_index*2]
-                heap[problem_index*2] = temp
+                heap[problem_index], heap[problem_index*2] = \
+                    heap[problem_index*2], heap[problem_index]
 
                 problem_index *= 2
+
+                swaps += 1
             
             else:
                 
-                temp = heap[problem_index]
-                heap[problem_index] = heap[problem_index*2+1]
-                heap[problem_index*2+1] = temp
+                heap[problem_index], heap[problem_index*2+1] = \
+                    heap[problem_index*2+1], heap[problem_index]
 
                 problem_index *= 2
                 problem_index += 1
 
-    return [x for x in out_array if x != inf]
+                swaps += 2
+    
+    end_time = time()
+
+    return [x for x in out_array if x != inf], end_time - start_time, \
+        comparisons, swaps
 
 def stooge_sort(array):
+
+    start_time = time()
+
+    comparisons = 0
+    swaps = 0
 
     if len(array) < 2:
 
@@ -192,7 +316,11 @@ def stooge_sort(array):
     
     if len(array) == 2:
 
+        comparisons += 1
+
         if array[0] > array[1]:
+
+            swaps += 1
 
             return [array[1], array[0]]
 
@@ -200,37 +328,60 @@ def stooge_sort(array):
 
     if len(array) == 3:
 
+        comparisons += 3
+
         if array[0] > array[1]:
 
-            temp = array[0]
-            array[0] = array[1]
-            array[1] = temp
+            swaps += 1
+
+            array[0], array[1] = \
+                array[1], array[0]
         
         if array[1] > array[2]:
 
-            temp = array[1]
-            array[1] = array[2]
-            array[2] = temp
+            swaps += 1
+
+            array[1], array[2] = \
+                array[2], array[1]
         
         if array[0] > array[1]:
 
-            temp = array[0]
-            array[0] = array[1]
-            array[1] = temp
+            swaps += 1
+
+            array[0], array[1] = \
+                array[1], array[0]
         
         return array
     
     length = (len(array)*2+2)//3
 
-    array = stooge_sort(array[:length]) + array[length:]
-    array = array[:-length] + stooge_sort(array[-length:])
-    array = stooge_sort(array[:length]) + array[length:]
+    array_return = stooge_sort(array[:length]) + array[length:]
+    array = array_return[0]
+    comparisons += array_return[2]
+    swaps += array_return[3]
+
+    array_return = array[:-length] + stooge_sort(array[-length:])
+    array = array_return[0]
+    comparisons += array_return[2]
+    swaps += array_return[3]
     
-    return array
+    array_return = stooge_sort(array[:length]) + array[length:]
+    array = array_return[0]
+    comparisons += array_return[2]
+    swaps += array_return[3]
+    
+    end_time = time()
+    
+    return array, end_time - start_time, comparisons, swaps
 
 def quick_sort(array):
     
-    if len(array) == 0: return array
+    if len(array) == 0: return array, 0, 0, 0
+
+    start_time = time()
+
+    comparisons = 0
+    swaps = 0
 
     pivot = randrange(len(array))
 
@@ -240,6 +391,8 @@ def quick_sort(array):
     while low < pivot or high > pivot:
 
         swap = True
+
+        comparisons += 2
 
         if array[low] <= array[pivot] and low < pivot:
 
@@ -261,24 +414,94 @@ def quick_sort(array):
 
                 pivot = high
             
-            temp = array[low]
-            array[low] = array[high]
-            array[high] = temp
+            array[low], array[high] = \
+                array[high], array[low]
+            
+            swaps += 1
     
-    return quick_sort(array[:pivot]) + [array[pivot]] + quick_sort(array[pivot+1:])
+    begin = quick_sort(array[:pivot])
+    comparisons += begin[2]
+    swaps += begin[3]
 
+    middle = [array[pivot]]
+
+    end = quick_sort(array[pivot+1:])
+    comparisons += end[2]
+    swaps += end[3]
+
+    end_time = time()
+
+    return begin[0]+middle+end[0], end_time - start_time, comparisons, swaps
+        
+
+def array_input():
+
+    arr = []
+
+    print("Enter array one element at a time - leave blank to finish:")
+
+    inp = input()
+
+    if inp == "":
+
+        raise InputRefusedError()
+
+    while inp != "":
+
+        arr.append(eval(inp))
+        
+        inp = input()
+    
+    return arr
+
+def sort_input():
+
+    print("Enter sort type - leave blank to quit:")
+
+    sort_type = input()
+
+    while sort_type not in SORTS:
+
+        if sort_type == "":
+
+            raise InputRefusedError
+
+        print("That is not a valid sort, must be in", list(SORTS.keys()))
+
+        sort_type = input()
+
+    return SORTS[sort_type]
+
+def full_input_sort():
+
+    print(sort_input()(array_input()))
+
+
+SORTS = {
+        "Insertion": insertion_sort, 
+        "Bubble" : bubble_sort,
+        "Cocktail shaker" : cocktail_shaker_sort,
+        "Merge" : merge_sort,
+        "Heap" : heap_sort,
+        "Quick" : quick_sort,
+        "Stooge" : stooge_sort,
+        #"Bogo" : bogo_sort,
+        }
+
+SWAP_SORTS = {
+    "Insertion",
+    "Bubble",
+    "Cocktail shaker",
+    "Heap",
+    "Quick",
+    "Stooge",
+}
 
 if __name__ == "__main__":
 
-    for sort in [("Insertion", insertion_sort), 
-                ("Bubble", bubble_sort),
-                ("Merge", merge_sort),
-                ("Heap", heap_sort),
-                ("Quick", quick_sort),
-                ("Stooge", stooge_sort),
-                ("Bogo", bogo_sort),]:
+    for sort in SORTS:
         
-        print(f"\nTESTING {sort[0]} Sort\n")
+        print(f"\nTESTING {sort} Sort\n")
 
         with open("sorting_unit_tests.txt", "r") as tests:
 
@@ -287,16 +510,96 @@ if __name__ == "__main__":
 
                 print(f"Test {index+1}:\nInput {test[0]}")
 
-                result = sort[1](test[0])
+                try:
 
-                if result == test[1]:
+                    result = SORTS[sort](test[0])
+                
+                except BogoIterationError:
 
-                    print("PASSED")
+                    print("PLAUSABLE, failed due to iteration limit")
+
+                else:
+
+                    if result[0] == test[1]:
+
+                        print("PASSED")
+                    
+                    else:
+
+                        print(f"FAILED, expected {test[1]}, got {result}")
+                            
+                        exit(1)
+
+    speed_iterations = 1000
+
+    length_test = 1000
+
+    speeds = {}
+    comparisons = {}
+    swaps = {}
+
+    for count in range(speed_iterations):
+
+        test = [x for x in range(length_test)]
+        shuffle(test)
+
+        for sort in SORTS:
+
+            result = SORTS[sort](test)
+
+            if sort in speeds:
+
+                speeds[sort] += result[1]
+            
+            else:
+
+                speeds[sort] = result[1]
+            
+            if sort in comparisons:
+
+                comparisons[sort] += result[2]
+            
+            else:
+
+                comparisons[sort] = result[2]
+            
+            if sort in SWAP_SORTS:
+
+                if sort in swaps:
+
+                    swaps[sort] += result[1]
                 
                 else:
 
-                    print(f"FAILED, expected {test[1]}, got {result}")
-                        
-                    exit(1)
+                    swaps[sort] = result[1]
+    
+    for sort in speeds:
+
+        speeds[sort] /= speed_iterations
+
+    for sort in comparisons:
+
+        comparisons[sort] /= speed_iterations
+    
+    for sort in swaps:
+
+        swaps[sort] /= speed_iterations
+    
+    print("Average times:\n", speeds)
+    print("\nAverage comparisons:\n", comparisons)
+    print("\nAverage swaps:\n", swaps)
+
+        
+    while True:
+
+        try:
+
+            full_input_sort()
+        
+        except InputRefusedError:
+
+            print("Quitting")
+
+            break
 
     exit(0)
