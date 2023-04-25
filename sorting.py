@@ -312,7 +312,7 @@ def stooge_sort(array):
 
     if len(array) < 2:
 
-        return array
+        return array, 0, comparisons, swaps
     
     if len(array) == 2:
 
@@ -322,7 +322,7 @@ def stooge_sort(array):
 
             swaps += 1
 
-            return [array[1], array[0]]
+            return [array[1], array[0]], 0, comparisons, swaps
 
         return array
 
@@ -351,22 +351,22 @@ def stooge_sort(array):
             array[0], array[1] = \
                 array[1], array[0]
         
-        return array
+        return array, 0, comparisons, swaps
     
     length = (len(array)*2+2)//3
 
-    array_return = stooge_sort(array[:length]) + array[length:]
-    array = array_return[0]
+    array_return = stooge_sort(array[:length])
+    array = array_return[0] + array[length:]
     comparisons += array_return[2]
     swaps += array_return[3]
 
-    array_return = array[:-length] + stooge_sort(array[-length:])
-    array = array_return[0]
+    array_return =stooge_sort(array[-length:])
+    array =  array[:-length] + array_return[0]
     comparisons += array_return[2]
     swaps += array_return[3]
     
-    array_return = stooge_sort(array[:length]) + array[length:]
-    array = array_return[0]
+    array_return = stooge_sort(array[:length])
+    array = array_return[0] + array[length:]
     comparisons += array_return[2]
     swaps += array_return[3]
     
@@ -484,7 +484,7 @@ SORTS = {
         "Merge" : merge_sort,
         "Heap" : heap_sort,
         "Quick" : quick_sort,
-        "Stooge" : stooge_sort,
+        #"Stooge" : stooge_sort,
         #"Bogo" : bogo_sort,
         }
 
@@ -494,7 +494,7 @@ SWAP_SORTS = {
     "Cocktail shaker",
     "Heap",
     "Quick",
-    "Stooge",
+    #"Stooge",
 }
 
 if __name__ == "__main__":
@@ -530,7 +530,7 @@ if __name__ == "__main__":
                             
                         exit(1)
 
-    speed_iterations = 1000
+    speed_iterations = 10
 
     length_test = 1000
 
@@ -546,6 +546,13 @@ if __name__ == "__main__":
         for sort in SORTS:
 
             result = SORTS[sort](test)
+
+            if result[0] != [x for x in range(length_test)]:
+
+                print(count, sort, test, result)
+                break
+
+            print(count, sort)
 
             if sort in speeds:
 
@@ -567,11 +574,11 @@ if __name__ == "__main__":
 
                 if sort in swaps:
 
-                    swaps[sort] += result[1]
+                    swaps[sort] += result[3]
                 
                 else:
 
-                    swaps[sort] = result[1]
+                    swaps[sort] = result[3]
     
     for sort in speeds:
 
