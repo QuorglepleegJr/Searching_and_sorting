@@ -35,6 +35,10 @@ def insertion_sort(array):
                 
                 swap_number += 1
             
+            else:
+
+                break
+            
             swaps += 1
         
         sorted_index += 1
@@ -432,7 +436,80 @@ def quick_sort(array):
     end_time = time()
 
     return begin[0]+middle+end[0], end_time - start_time, comparisons, swaps
-        
+
+def counting_sort(array):
+
+    start_time = time()
+
+    if len(array) < 2:
+
+        end_time = time()
+
+        return array, end_time - start_time
+
+    shifts = 0
+
+    all_ints = True
+
+    for value in array:
+
+        if isinstance(value, float) and not value.is_integer():
+
+            all_ints = False
+
+    while not all_ints:
+
+        array = [x*10 for x in array]
+
+        shifts += 1
+
+        all_ints = True
+
+        for value in array:
+
+            if isinstance(value, float) and not value.is_integer():
+
+                all_ints = False
+    
+    array = [int(x) for x in array]
+
+    minimum = min(array)
+    maximum = max(array)
+
+    values = dict([(x, 0) for x in range(minimum, maximum+1)])
+
+    for value in array:
+
+        values[value] += 1
+    
+    for value in range(maximum, minimum-1, -1):
+
+        for x in range(minimum, value):
+
+            values[value] += values[x]
+
+    out_array = [None] * len(array)
+
+    for value in array:
+
+        out_array[values[value]-1] = value
+
+        values[value] -= 1
+    
+    end_time = time()
+
+    return out_array, end_time - start_time
+
+def radix_sort(array):
+
+    start_time = time()
+
+    comparisons = 0
+    swaps = 0
+
+    for index in range(len(array)):
+
+        pass
 
 def array_input():
 
@@ -484,17 +561,29 @@ SORTS = {
         "Merge" : merge_sort,
         "Heap" : heap_sort,
         "Quick" : quick_sort,
+        #"Counting" : counting_sort,
         #"Stooge" : stooge_sort,
         #"Bogo" : bogo_sort,
-        }
+}
+
+COMPARISON_SORTS = {
+        "Insertion",
+        "Bubble",
+        "Cocktail shaker",
+        "Merge",
+        "Heap",
+        "Quick",
+        #"Counting",
+        "Stooge",
+}
 
 SWAP_SORTS = {
-    "Insertion",
-    "Bubble",
-    "Cocktail shaker",
-    "Heap",
-    "Quick",
-    #"Stooge",
+        "Insertion",
+        "Bubble",
+        "Cocktail shaker",
+        "Heap",
+        "Quick",
+        #"Stooge",
 }
 
 if __name__ == "__main__":
@@ -529,8 +618,10 @@ if __name__ == "__main__":
                         print(f"FAILED, expected {test[1]}, got {result}")
                             
                         exit(1)
+    
+    print("\n\n")
 
-    speed_iterations = 10
+    speed_iterations = 100
 
     length_test = 1000
 
@@ -545,7 +636,7 @@ if __name__ == "__main__":
 
         for sort in SORTS:
 
-            result = SORTS[sort](test)
+            result = SORTS[sort](test[:])
 
             if result[0] != [x for x in range(length_test)]:
 
@@ -562,13 +653,15 @@ if __name__ == "__main__":
 
                 speeds[sort] = result[1]
             
-            if sort in comparisons:
-
-                comparisons[sort] += result[2]
+            if sort in COMPARISON_SORTS:
             
-            else:
+                if sort in comparisons:
 
-                comparisons[sort] = result[2]
+                    comparisons[sort] += result[2]
+                
+                else:
+
+                    comparisons[sort] = result[2]
             
             if sort in SWAP_SORTS:
 
@@ -592,9 +685,17 @@ if __name__ == "__main__":
 
         swaps[sort] /= speed_iterations
     
-    print("Average times:\n", speeds)
-    print("\nAverage comparisons:\n", comparisons)
-    print("\nAverage swaps:\n", swaps)
+    print("\nAverage times:\n")
+    for sort in speeds:
+        print(f"{sort}: {speeds[sort]}")
+
+    print("\nAverage comparisons:\n")
+    for sort in comparisons:
+        print(f"{sort}: {comparisons[sort]}")
+
+    print("\nAverage swaps:\n")
+    for sort in swaps:
+        print(f"{sort}: {swaps[sort]}")
 
         
     while True:
