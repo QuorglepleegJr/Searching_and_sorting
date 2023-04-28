@@ -685,9 +685,9 @@ if __name__ == "__main__":
 
         swaps[sort] /= speed_iterations
     
-    print("\nAverage times:\n")
+    print("\nAverage times (ms):\n")
     for sort in speeds:
-        print(f"{sort}: {speeds[sort]}")
+        print(f"{sort}: {speeds[sort]*1000}")
 
     print("\nAverage comparisons:\n")
     for sort in comparisons:
