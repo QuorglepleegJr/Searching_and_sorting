@@ -441,12 +441,6 @@ def counting_sort(array):
 
     start_time = time()
 
-    if len(array) < 2:
-
-        end_time = time()
-
-        return array, end_time - start_time
-
     shifts = 0
 
     all_ints = True
@@ -470,35 +464,41 @@ def counting_sort(array):
             if isinstance(value, float) and not value.is_integer():
 
                 all_ints = False
+
+    full_out_array = []
     
-    array = [int(x) for x in array]
+    for array in ([int(x) for x in array if x < 0], [int(x) for x in array if x >= 0]):
 
-    minimum = min(array)
-    maximum = max(array)
+        out_array = [None] * len(array)
 
-    values = dict([(x, 0) for x in range(minimum, maximum+1)])
+        if len(array) >= 1:
 
-    for value in array:
+            minimum = min(array)
+            maximum = max(array)
 
-        values[value] += 1
+            values = dict([(x, 0) for x in range(minimum, maximum+1)])
+
+            for value in array:
+
+                values[value] += 1
     
-    for value in range(maximum, minimum-1, -1):
+            for value in range(maximum, minimum-1, -1):
 
-        for x in range(minimum, value):
+                for x in range(minimum, value):
 
-            values[value] += values[x]
+                    values[value] += values[x]
 
-    out_array = [None] * len(array)
+            for value in array:
 
-    for value in array:
+                out_array[values[value]-1] = value/(10**shifts)
 
-        out_array[values[value]-1] = value
+                values[value] -= 1
 
-        values[value] -= 1
+        full_out_array += [x for x in out_array if x is not None]
     
     end_time = time()
 
-    return out_array, end_time - start_time
+    return full_out_array, end_time - start_time
 
 def radix_sort(array):
 
@@ -561,7 +561,7 @@ SORTS = {
         "Merge" : merge_sort,
         "Heap" : heap_sort,
         "Quick" : quick_sort,
-        #"Counting" : counting_sort,
+        "Counting" : counting_sort,
         #"Stooge" : stooge_sort,
         #"Bogo" : bogo_sort,
 }
@@ -621,7 +621,7 @@ if __name__ == "__main__":
     
     print("\n\n")
 
-    speed_iterations = 100
+    speed_iterations = 10
 
     length_test = 1000
 
