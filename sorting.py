@@ -513,49 +513,85 @@ def radix_sort(array):
 
     start_time = time()
 
-    comparisons = 0
-    swaps = 0
+    out_array = []
 
     for array, negative in (([abs(x) for x in array if x < 0], True), \
                             ([x for x in array if x >= 0], False)):
 
-        array = [str(x) for x in array]
-
-        max_prelen = 0
-        max_postlen = 0
-
-        for index in range(len(array)):
-
-            decimal_split = array[index].split(".")
-
-            if len(decimal_split[0]) > max_prelen:
-
-                max_prelen = len(decimal_split[0])
-
-            if len(decimal_split) > 1 and len(decimal_split[1]) > max_postlen:
-
-                max_postlen = len(decimal_split[1])
+        if len(array) != 0:
         
-        for index in range(len(array)):
+            array = [str(x) for x in array]
 
-            decimal_split = array[index].split(".")
+            max_prelen = 0
+            max_postlen = 0
 
-            array[index] = "0" * (max_prelen - len(decimal_split[0])) + array[index]
+            for index in range(len(array)):
 
-            if max_postlen > 0:
+                dec_split = array[index].split(".")
 
-                if len(decimal_split) == 1:
+                if len(dec_split[0]) > max_prelen:
 
-                    array[index] += "." + "0" * max_postlen
+                    max_prelen = len(dec_split[0])
+
+                if len(dec_split) > 1 and len(dec_split[1]) > max_postlen:
+
+                    max_postlen = len(dec_split[1])
+            
+            for index in range(len(array)):
+
+                dec_split = array[index].split(".")
+
+                array[index] = "0"*(max_prelen-len(dec_split[0]))+array[index]
+
+                if max_postlen > 0:
+
+                    if len(dec_split) == 1:
+
+                        array[index] += "." + "0" * max_postlen
+                    
+                    else:
+
+                        array[index] += "0"*(max_postlen-len(dec_split[1]))
+
+            for digit in range(len(array[0])-1, -1, -1):
+
+                current_out_array = [None] * len(array)
+
+                if digit != max_prelen:
+
+                    tally = [0] * 10
+
+                    for num_string in array:
+
+                        tally[int(num_string[digit])] += 1
+                    
+                    for i in range(1, len(tally)):
+
+                        tally[i] += tally[i-1]
+                    
+                    tally = [0] + tally
+                    
+                    for num_string in array:
+
+                        current_out_array[tally[int(num_string[digit])]] = num_string
+                        tally[int(num_string[digit])] += 1
                 
-                else:
+                array = current_out_array[:]
+            
+            if negative:
 
-                    array[index] += "0" * (max_postlen - len(decimal_split[1]))
+                array = ["-"+x for x in array]
+                array.reverse()
         
-        print(array)
+        out_array += array
+    
+    print(out_array)
+    
+    out_array = [eval(x.lstrip("0")) if x.lstrip("0") != "" else 0 for x in out_array]
 
-    return counting_sort(temp_array)
+    end_time = time()
 
+    return out_array, end_time - start_time
 
 
 
