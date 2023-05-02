@@ -443,6 +443,12 @@ def counting_sort(array):
 
     shifts = 0
 
+    if len(array) == 0:
+
+        end_time = time()
+
+        return array, end_time - start_time
+
     all_ints = True
 
     for value in array:
@@ -465,6 +471,10 @@ def counting_sort(array):
 
                 all_ints = False
 
+    minimum = min(array)
+
+    array = [x-minimum+1 for x in array]
+
     full_out_array = []
     
     for array in ([int(x) for x in array if x < 0], [int(x) for x in array if x >= 0]):
@@ -473,28 +483,25 @@ def counting_sort(array):
 
         if len(array) >= 1:
 
-            minimum = min(array)
             maximum = max(array)
 
-            values = dict([(x, 0) for x in range(minimum, maximum+1)])
+            tally = [0] * (maximum+1)
 
             for value in array:
 
-                values[value] += 1
+                tally[value] += 1
     
-            for value in range(maximum, minimum-1, -1):
+            for i in range(1, len(tally)):
 
-                for x in range(minimum, value):
-
-                    values[value] += values[x]
+                    tally[i] += tally[i-1]
 
             for value in array:
 
-                out_array[values[value]-1] = value/(10**shifts)
+                out_array[tally[value-1]] = (value + minimum - 1)/(10**shifts)
 
-                values[value] -= 1
+                tally[value-1] += 1
 
-        full_out_array += [x for x in out_array if x is not None]
+        full_out_array += out_array
     
     end_time = time()
 
@@ -502,14 +509,55 @@ def counting_sort(array):
 
 def radix_sort(array):
 
+    temp_array = array[:]
+
     start_time = time()
 
     comparisons = 0
     swaps = 0
 
-    for index in range(len(array)):
+    for array, negative in (([abs(x) for x in array if x < 0], True), \
+                            ([x for x in array if x >= 0], False)):
 
-        pass
+        array = [str(x) for x in array]
+
+        max_prelen = 0
+        max_postlen = 0
+
+        for index in range(len(array)):
+
+            decimal_split = array[index].split(".")
+
+            if len(decimal_split[0]) > max_prelen:
+
+                max_prelen = len(decimal_split[0])
+
+            if len(decimal_split) > 1 and len(decimal_split[1]) > max_postlen:
+
+                max_postlen = len(decimal_split[1])
+        
+        for index in range(len(array)):
+
+            decimal_split = array[index].split(".")
+
+            array[index] = "0" * (max_prelen - len(decimal_split[0])) + array[index]
+
+            if max_postlen > 0:
+
+                if len(decimal_split) == 1:
+
+                    array[index] += "." + "0" * max_postlen
+                
+                else:
+
+                    array[index] += "0" * (max_postlen - len(decimal_split[1]))
+        
+        print(array)
+
+    return counting_sort(temp_array)
+
+
+
 
 def array_input():
 
@@ -562,6 +610,7 @@ SORTS = {
         "Heap" : heap_sort,
         "Quick" : quick_sort,
         "Counting" : counting_sort,
+        "Radix": radix_sort,
         #"Stooge" : stooge_sort,
         #"Bogo" : bogo_sort,
 }
@@ -573,7 +622,6 @@ COMPARISON_SORTS = {
         "Merge",
         "Heap",
         "Quick",
-        #"Counting",
         "Stooge",
 }
 
@@ -583,7 +631,7 @@ SWAP_SORTS = {
         "Cocktail shaker",
         "Heap",
         "Quick",
-        #"Stooge",
+        "Stooge",
 }
 
 if __name__ == "__main__":
@@ -640,10 +688,10 @@ if __name__ == "__main__":
 
             if result[0] != [x for x in range(length_test)]:
 
-                print(count, sort, test, result)
+                print(count+1, sort, test, result)
                 break
 
-            print(count, sort)
+            print(count+1, sort)
 
             if sort in speeds:
 
@@ -696,7 +744,20 @@ if __name__ == "__main__":
     print("\nAverage swaps:\n")
     for sort in swaps:
         print(f"{sort}: {swaps[sort]}")
+    
 
+    print("\nLength test:\n")
+
+    array = [x for x in range(10000)]
+    shuffle(array)
+
+    for sort in SORTS:
+
+        print(f"{sort}:")
+        print(SORTS[sort](array[:])[1])
+        print()
+    
+    print()
         
     while True:
 
