@@ -576,16 +576,14 @@ def radix_sort(array):
                         current_out_array[tally[int(num_string[digit])]] = num_string
                         tally[int(num_string[digit])] += 1
                 
-                array = current_out_array[:]
+                    array = current_out_array[:]
             
             if negative:
 
-                array = ["-"+x for x in array]
+                array = ["-"+x.lstrip("0") if x.lstrip("0") != "" else 0 for x in array]
                 array.reverse()
         
         out_array += array
-    
-    print(out_array)
     
     out_array = [eval(x.lstrip("0")) if x.lstrip("0") != "" else 0 for x in out_array]
 
@@ -635,7 +633,14 @@ def sort_input():
 
 def full_input_sort():
 
-    print(sort_input()(array_input()))
+    out = sort_input()(array_input())
+
+    print("Sorted:", out[0])
+    print("Time taken (ms):", out[1]/1000)
+    if len(out) > 2:
+        print("Comparisons:", out[2])
+    if len(out) > 3:
+        print("Swaps:", out[3])
 
 
 SORTS = {
@@ -647,8 +652,19 @@ SORTS = {
         "Quick" : quick_sort,
         "Counting" : counting_sort,
         "Radix": radix_sort,
-        #"Stooge" : stooge_sort,
-        #"Bogo" : bogo_sort,
+        "Stooge" : stooge_sort,
+        "Bogo" : bogo_sort,
+}
+
+SPEED_SORTS = {
+        "Insertion",
+        "Bubble",
+        "Cocktail shaker",
+        "Merge",
+        "Heap",
+        "Quick",
+        "Counting",
+        "Radix",
 }
 
 COMPARISON_SORTS = {
@@ -668,6 +684,12 @@ SWAP_SORTS = {
         "Heap",
         "Quick",
         "Stooge",
+}
+
+LENGTH_SORTS = {
+        "Merge",
+        "Counting",
+        "Radix",
 }
 
 if __name__ == "__main__":
@@ -718,7 +740,7 @@ if __name__ == "__main__":
         test = [x for x in range(length_test)]
         shuffle(test)
 
-        for sort in SORTS:
+        for sort in SPEED_SORTS:
 
             result = SORTS[sort](test[:])
 
@@ -784,10 +806,10 @@ if __name__ == "__main__":
 
     print("\nLength test:\n")
 
-    array = [x for x in range(10000)]
+    array = [randrange(-100000,100000) for x in range(10000)]
     shuffle(array)
 
-    for sort in SORTS:
+    for sort in LENGTH_SORTS:
 
         print(f"{sort}:")
         print(SORTS[sort](array[:])[1])
